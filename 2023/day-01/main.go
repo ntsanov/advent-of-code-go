@@ -45,6 +45,7 @@ func main() {
 	input, err := os.ReadFile("input.txt")
 	if err != nil {
 		slog.Error("could not read input", err, err.Error())
+		os.Exit(-1)
 	}
 	lines := strings.Split(string(input), "\n")
 	for _, line := range lines {
