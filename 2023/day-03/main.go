@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log/slog"
 	"os"
 	"strconv"
@@ -35,15 +34,6 @@ type Number struct {
 	Start int
 	End   int
 	Raw   int
-}
-
-func hasSymbol(runes []rune) bool {
-	for _, r := range runes {
-		if r != dot {
-			return true
-		}
-	}
-	return false
 }
 
 func (n Number) Int() int {
@@ -150,43 +140,32 @@ func main() {
 		partNumSum int64
 		ratioSum   int64
 	)
+	symbols := Symbols{symbolMatrix}
 	for rawIdx, raw := range partNumbers {
 		for _, n := range raw {
 			var (
-				minIdx int
-				maxIdx int
-				endIdx = n.Start + len(n.rune)
+				endIdx     = n.Start + len(n.rune)
+				minCol int = n.Start
+				maxCol int = endIdx
+				minRaw int = rawIdx
+				maxRaw int = rawIdx
 			)
 			if n.Start > 0 {
-				minIdx = n.Start - 1
-				if symbolMatrix[rawIdx][minIdx] != dot {
-					partNumSum += int64(n.Int())
-					continue
-				}
-			} else {
-				minIdx = n.Start
+				minCol--
 			}
 			if endIdx < len(symbolMatrix[rawIdx])-1 {
-				maxIdx = endIdx + 1
-				if symbolMatrix[rawIdx][endIdx] != dot {
-					partNumSum += int64(n.Int())
-					continue
-				}
-			} else {
-				maxIdx = endIdx
+				maxCol++
 			}
 			if rawIdx > 0 {
-				if hasSymbol(symbolMatrix[rawIdx-1][minIdx:maxIdx]) {
-					partNumSum += int64(n.Int())
-					continue
-				}
+				minRaw--
 			}
 			if rawIdx < len(symbolMatrix)-1 {
-				if hasSymbol(symbolMatrix[rawIdx+1][minIdx:maxIdx]) {
-					partNumSum += int64(n.Int())
-					continue
-				}
+				maxRaw++
 			}
+			if symbols.HasSymbol(minRaw, minCol, maxRaw+1, maxCol) {
+				partNumSum += int64(n.Int())
+			}
+
 		}
 	}
 	for _, gear := range gears {
@@ -218,6 +197,5 @@ func main() {
 			ratioSum += ratio
 		}
 	}
-	fmt.Println("gears", len(gears))
-	fmt.Println("sum_p1:", partNumSum, "sum_p2", ratioSum)
+	slog.Info("great success", "sum_p1", partNumSum, "sum_p2", ratioSum)
 }
